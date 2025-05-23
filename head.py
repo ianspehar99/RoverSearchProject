@@ -1,4 +1,7 @@
 import math
+import tf_transformations
+from geometry_msgs.msg import Quaternion
+
 
 def get_turn_angle(rover_x, rover_y, rover_yaw_deg, goal_x, goal_y):
     # Calculate vector from rover to waypoint
@@ -22,7 +25,7 @@ def get_turn_angle(rover_x, rover_y, rover_yaw_deg, goal_x, goal_y):
 
 
 # Reached waypoint yet? (Within margin of error radius_)
-def reached_waypoint(current_position, waypoint,margin_of_error=0.1):
+def reached_waypoint(current_position, waypoint,margin_of_error=0.5):
     xc = current_position[0]
     yc = current_position[1]
     xw = waypoint[0]
@@ -30,6 +33,13 @@ def reached_waypoint(current_position, waypoint,margin_of_error=0.1):
     distance = ((xc - xw) ** 2 + (yc - yw) ** 2) ** 0.5
     
     return distance < margin_of_error
+
+def quaternion_to_yaw(quaternion):
+    # Convert quaternion to yaw angle
+    q = (quaternion.x, quaternion.y, quaternion.z, quaternion.w)
+    euler = tf_transformations.euler_from_quaternion(q)
+    bearing = euler[2]  #Bearing in radians
+    return bearing, math.degrees(bearing)  
 
 rover_x = 0.0
 rover_y = 0.0
