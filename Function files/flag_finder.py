@@ -1,7 +1,7 @@
-
 import cv2
 import numpy as np
 
+from sensor_msgs.msg import Image
 
 
 def flag_detector(img,flag_color,area_threshold = 1000):
@@ -37,19 +37,5 @@ def flag_detector(img,flag_color,area_threshold = 1000):
     return flag_detected, (cx,cy)
 
 
-img_bgr = cv2.imread('red_flag.png')
 
-flag_color = 'red'
-flag_detected, centroid = flag_detector(img_bgr,flag_color,area_threshold = 1000)
-cx = centroid[0]
-cy = centroid[1]
 
-color = (0, 255, 0)
-cv2.circle(img_bgr, (cx, cy), 6, color, -1)
-cv2.putText(img_bgr, "Flag", (cx + 10, cy),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-
-# --- 4. Show image ---
-cv2.imshow("Test Result", img_bgr)
-cv2.waitKey(0)
-cv2.destroyAllWindows()

@@ -16,6 +16,8 @@ from rclpy.node import Node
 # Import srv for starting/stopping
 from services_messages.srv import SendData
 
+from std_msgs.msg import bool
+
 # Image datatype
 from sensor_msgs.msg import Image
 
@@ -27,7 +29,6 @@ from gazebo_msgs.msg import ModelState
 # Access later with msg.pose[index].position.x
 #                   msg.pose[index].position.y
 # index = msg.name.index("your_robot_name")
-
 # Functions
 from head import get_turn_angle, reached_waypoint, quaternion_to_yaw, get_smallest_angle
 from lidar_navigation import *   # Need all functions 
@@ -39,13 +40,15 @@ class NavNode(Node):
         super().__init__('main_nav_node')
 
         # SUBSCRIPTIONS (msg type,topic name,callback,queue size)
-        # Camera depth image
-        self.cam_sub = self.create_subscription(Image, 'depth_topic_name',self.camera_depth_callback,10) 
+        # Sub to flag search node
+        self.flag_node_sub = self.create_subscription(bool,'flag_found',self.flag_node_callback)
+
         # GPS and IMU data (For my project, simple x,y - for rover, will be actual gps)
         self.gps_sub = self.create_subscription(ModelState, '/gazebo/model_states',self.gps_callback,10) 
         
         # IMU data - This will be seperate on actual rover, for now the gps_sub gets x,y, and quat from gazebo
-        #self.imu_sub = self.create_subscription(ModelState, 'heading',self.imu_callback,10)
+        self.imu_sub = self.create_subscription(ModelState, 'heading',self.imu_callback,10)
+
 
         # PUBLISHERS
         self.heading_pub = self.create_publisher(Twist, 'heading_and_velocity',10)
@@ -72,9 +75,9 @@ class NavNode(Node):
         self.side_dist_array = [] # For corner handling
         self.hitpoint = ()  # Stores robot position at time of obstacle detected/ bug started
         self.desired_angle = None # store for turning/ angle comparison
-        self.still_turning_bug = False # 90 degree turning
         self.turning_left = False
         self.left_clear_heading = None
+        self.flag_found = False # Tracks flag finding node output
 
         self.get_logger().info('Nav node ready, waiting for service call...')
 
@@ -251,8 +254,9 @@ class NavNode(Node):
                     self.i +=1
             
         
-    def camera_flag_callback(self,msg):
-        ######## Need t figure out how to do this, seperate node maybe? idk
+    def flag_node_callback(self,msg):
+        # Callback for flag search node
+        self.flag_found = msg.data
 
     def gps_callback(self,msg):
         # Get the x,y position of the rover from the model states topic
@@ -269,10 +273,6 @@ class NavNode(Node):
 
         # Set as current heading (from positive x axis)
         self.heading = yaw_deg
-
-    def service_callback(self, request, response):
-        
-        #This can just be very simple stop/start command or not i meannnn
 
 # Main function
 def main(args=None):
