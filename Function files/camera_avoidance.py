@@ -71,12 +71,6 @@ def start_bug_mode(current_position, waypoint,cutoff_distance=2.5):
     return distance < cutoff_distance , hitpoint
 
 
-FIND THE CENTROID OF THE OBJECT, USE CAMERA LINE FOLLOWING 
-LOGIC PID CONTROL JUST P TO KEEP IT SLIGHTLY LEFT. TUNE THAT 'LEFT OFFSET' ValuE,
-AND THE CUTOFF FOR WHEN YOU CONSIDER THE OBJECT IN FRON OF YOU (DEPTH TRHESHOLD)
-
-something like this:
-
 # This function takes in the depth camera image, converts it into binary mask - each pixel either below threshold
 # or not - then it does contouring and finds the centroid this is lit bang obstacle detection using
 # camera

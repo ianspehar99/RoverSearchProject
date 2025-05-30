@@ -8,20 +8,24 @@ def get_turn_angle(rover_x, rover_y, rover_yaw_deg, goal_x, goal_y):
     dx = goal_x - rover_x
     dy = goal_y - rover_y
 
-    nav_vector = (dx, dy) #Will use this later for Bug 2(Check if on the vector)
-
     # Desired heading 
     desired_heading_rad = math.atan2(dy, dx)
     desired_heading_deg = math.degrees(desired_heading_rad)
 
     # Calc smallest distance
-    theta_dif = desired_heading_deg - rover_yaw_deg
+    theta_dif = get_smallest_angle(desired_heading_deg,rover_yaw_deg)
+
+    return theta_dif
+
+# Gets the smallest angle to turn between desired and current heading
+def get_smallest_angle(desired_angle,current_angle):
+    theta_dif = desired_angle - current_angle
     if theta_dif > 180:
         theta_dif -= 360
     elif theta_dif < -180:
         theta_dif += 360
 
-    return theta_dif, nav_vector # Degrees
+    return theta_dif
 
 
 # Reached waypoint yet? (Within margin of error radius_)

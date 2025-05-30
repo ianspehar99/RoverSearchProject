@@ -1,26 +1,9 @@
-# These functions look at camera images and spots the flag 
-
-
-# WE ALSO NEED TO DESIGN A FUNCTON FOR THIS, START FLAG MODE 
-# WHERE WE GO TO THE FLAG AUTOMATICALLY. JUST DO SAME SHIT AS WITH LINE FOLLOWING
-# WITH THE CAMERA WITH RC CARS, IDENTIFY THE BOX WITH HIGH CONCENTRATION OF <COLOR> PIXELS
 
 import cv2
 import numpy as np
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge
 
 
-# CONVERT ROS2 IMAGE DATA TYPE INTO A NUMPY/CV2 TYPE:
 
-def image_msg_to_np(img_msg):
-    bridge = CvBridge()  # Bridge instance
-    #LOWKEY MIGHT NEED TO SET ENCODING TO 'bgr8'
-    cv_image = bridge.imgmsg_to_cv2(img_msg, desired_encoding='passthrough')
-     
-    return cv_image
-
-# If flag detected, returns cx,cy
 def flag_detector(img,flag_color,area_threshold = 1000):
     # Takes in cv2 img and flag color
     color_range = {
@@ -39,6 +22,8 @@ def flag_detector(img,flag_color,area_threshold = 1000):
     # Placeholder vals for if not detected (just so we can return something)
     cx = -1
     cy = -1
+
+    flag_detected = False
     for cnt in contours:
         if cv2.contourArea(cnt) > area_threshold:
             M = cv2.moments(cnt)
@@ -46,8 +31,25 @@ def flag_detector(img,flag_color,area_threshold = 1000):
                 continue
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
-            # Flag detected, flag position
-            return True , (cx, cy)
+            flag_detected = True
         
     # Flag not detected, returns an impossible position
-    return False, (cx,cy)
+    return flag_detected, (cx,cy)
+
+
+img_bgr = cv2.imread('red_flag.png')
+
+flag_color = 'red'
+flag_detected, centroid = flag_detector(img_bgr,flag_color,area_threshold = 1000)
+cx = centroid[0]
+cy = centroid[1]
+
+color = (0, 255, 0)
+cv2.circle(img_bgr, (cx, cy), 6, color, -1)
+cv2.putText(img_bgr, "Flag", (cx + 10, cy),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+
+# --- 4. Show image ---
+cv2.imshow("Test Result", img_bgr)
+cv2.waitKey(0)
+cv2.destroyAllWindows()

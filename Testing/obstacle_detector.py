@@ -45,6 +45,8 @@ def depth_target_detector(depth_img, min_depth, max_depth,img_center_fraction = 
                 continue
             cx = int(M["m10"] / M["m00"])
             cy = int(M["m01"] / M["m00"])
+
+           ### This is wrong anyway, need to track the cx,cy of the biggest right??
             max_area = area
             biggest_contour = cnt
 
